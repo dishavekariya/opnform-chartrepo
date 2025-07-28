@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: {{ include "opnform.fullname" .}}- {{- .Values.api.config.name | default "api-config"}}
+data:
+    DB_HOST: myopnform-postgresql-hl
+    {{- with .Values.api.config.data }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}

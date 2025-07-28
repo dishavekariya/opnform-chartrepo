@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "opnform.fullname" . }}- {{- .Values.client.service.name | default "client-service"}}
+  labels:
+    {{- include "opnform.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.client.service.type }}
+  ports:
+    {{- with .Values.client.service.ports}}
+    {{- toYaml . | nindent 4}}
+    {{- end }}
+  selector:
+    {{- with .Values.client.podLabels }}
+    {{- toYaml . | nindent 4}}
+    {{- end }}

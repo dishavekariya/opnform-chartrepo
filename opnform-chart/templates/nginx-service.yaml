@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "opnform.fullname" . }}- {{- .Values.nginx.service.name | default "nginx-service"}}
+  labels:
+    {{- include "opnform.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.nginx.service.type }}
+  ports:
+    {{- with .Values.nginx.service.ports}}
+    {{- toYaml . | nindent 4}}
+    {{- end }}
+  selector:
+    {{- with .Values.nginx.podLabels }}
+    {{- toYaml . | nindent 4}}
+    {{- end }}

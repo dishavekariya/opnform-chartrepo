@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "opnform.fullname" . }}-{{ .Values.nginx.name | default "nginx" }}
+  labels:
+    {{- include "opnform.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.nginx.autoscaling.enabled }}
+  replicas: {{ .Values.nginx.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- with .Values.nginx.podLabels }}
+      {{- toYaml . | nindent 6}}
+      {{- end }}
+  template:
+    metadata:
+      {{- with .Values.nginx.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "opnform.labels" . | nindent 8 }}
+        {{- with .Values.nginx.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: default
+      {{- with .Values.nginx.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "opnform.fullname" . }}-{{- default "nginx" .Values.nginx.name }}
+          {{- with .Values.nginx.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.nginx.image.repository }}{{- if .Values.nginx.image.tag }}:{{ .Values.nginx.image.tag }}{{- end}}"
+          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+          {{- with .Values.nginx.ports }}
+          ports: 
+            {{- toYaml . | nindent 12}}
+          {{- end }}
+          {{- with .Values.nginx.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.nginx.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.nginx.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/templates
+            {{- with .Values.nginx.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          
+      
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: {{ include "opnform.fullname" .}}- {{- .Values.nginx.config.name | default "nginx-config"}}
+        {{- with .Values.nginx.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nginx.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginx.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginx.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+

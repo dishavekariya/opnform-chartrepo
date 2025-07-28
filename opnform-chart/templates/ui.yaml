@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "opnform.fullname" . }}- {{- .Values.client.name | default "client"  }}
+  labels:
+    {{- include "opnform.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.api.autoscaling.enabled }}
+  replicas: {{ .Values.client.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- with .Values.client.podLabels }}
+      {{- toYaml . | nindent 6}}
+      {{- end }}
+  template:
+    metadata:
+      {{- with .Values.client.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "opnform.labels" . | nindent 8 }}
+        {{- with .Values.client.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: default
+      {{- with .Values.client.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "opnform.fullname" . }}-{{- default "client" .Values.client.name }}
+          {{- with .Values.client.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.client.image.repository }}{{- if .Values.client.image.tag }}:{{ .Values.client.image.tag }}{{- end}}"
+          imagePullPolicy: {{ .Values.client.image.pullPolicy }}
+          {{- with .Values.client.ports }}
+          ports: 
+            {{- toYaml . | nindent 12}}
+          {{- end }}
+          {{- with .Values.client.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.client.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.client.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.client.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "opnform.fullname" . }}- {{- .Values.client.config.name | default "client-config"}}
+            {{- with .Values.client.envFrom }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      {{- with .Values.client.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.client.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.client.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.client.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

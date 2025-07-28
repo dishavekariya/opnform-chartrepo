@@ -1,0 +1,519 @@
+#api is for the api service in opnform
+api:
+  name: api
+  replicaCount: 1
+  # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+  image:
+    repository: dishavekariyaa/opnform:api-main-a763cca-1752669460
+    # This sets the pull policy for images.
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+  ports:
+    - name: api-port
+      containerPort: 9000
+      protocol: TCP
+
+  envFrom: []
+
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  livenessProbe:
+    # httpGet:
+    #   path: /
+    #   port: http
+  readinessProbe:
+    # httpGet:
+    #   path: /
+    #   port: http
+
+  # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Additional volumes on the output Deployment definition.
+  volumes:
+    - name: storage
+      emptyDir: {}
+
+  # Additional volumeMounts on the output Deployment definition.
+  volumeMounts:
+    - name: storage
+      mountPath: /usr/share/nginx/html/storage
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  # This is for setting Kubernetes Annotations to a Pod.
+  # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  podAnnotations: {}
+  # This is for setting Kubernetes Labels to a Pod.
+  # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  podLabels: 
+    app: opnform-api
+  
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    name: api-service
+    type: NodePort
+    ports :
+      - protocol: TCP
+        port: 9000
+        targetPort: api-port
+        nodePort: 30099
+      
+  config:
+    name: api-config
+    data:
+      # DB_HOST: "myopnform-postgres"
+      DB_PORT: "5432"
+      DB_CONNECTION: pgsql
+      LOG_LEVEL: debug
+      JWT_TTL: "1440"
+      JWT_SKIP_IP_UA_VALIDATION: "true"
+      SHOW_OFFICIAL_TEMPLATES: "true"
+
+  secret:
+    env: opnform-secret
+      
+
+
+#client is for the api service in opnform
+client:
+  name: client
+  replicaCount: 1
+  # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+  image:
+    repository: dishavekariyaa/opnform:ui-main-a763cca-1752669613
+    # This sets the pull policy for images.
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+  ports:
+    - name: client-port
+      containerPort: 3000
+      protocol: TCP
+
+  envFrom: []
+      
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  livenessProbe:
+    # httpGet:
+    #   path: /
+    #   port: http
+  readinessProbe:
+    # httpGet:
+    #   path: /
+    #   port: http
+
+  # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Additional volumes on the output Deployment definition.
+  volumes: []
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+
+  # Additional volumeMounts on the output Deployment definition.
+  volumeMounts: []
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  # This is for setting Kubernetes Annotations to a Pod.
+  # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  podAnnotations: {}
+  # This is for setting Kubernetes Labels to a Pod.
+  # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  podLabels: 
+    app: opnform-client
+  
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    name: client-service
+    type: NodePort
+    ports:
+      - protocol: TCP
+        port: 3000
+        targetPort: client-port
+        nodePort: 30302
+
+  config:
+    name: client-config
+    data:
+      NUXT_PUBLIC_APP_URL: "/"
+      NUXT_PUBLIC_API_BASE: "/api"
+      # NUXT_PRIVATE_API_BASE: "http://myopnform-nginx-service/api"
+#ui is for the api service in opnform
+
+nginx:
+  name: nginx
+  replicaCount: 1
+  # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+  image:
+    repository: nginx:1
+    # This sets the pull policy for images.
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+  ports:
+    - name: nginx-port
+      containerPort: 80
+
+  envFrom: []
+      
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  livenessProbe:
+    # httpGet:
+    #   path: /
+    #   port: http
+  readinessProbe:
+    # httpGet:
+    #   path: /
+    #   port: http
+
+  # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # Additional volumes on the output Deployment definition.
+  volumes: []
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+
+  # Additional volumeMounts on the output Deployment definition.
+  volumeMounts: []
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  # This is for setting Kubernetes Annotations to a Pod.
+  # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  podAnnotations: {}
+  # This is for setting Kubernetes Labels to a Pod.
+  # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  podLabels: 
+    app: opnform-nginx
+  
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    name: nginx-service
+    type: NodePort
+    ports:
+      - port: 80
+        targetPort: nginx-port
+        nodePort: 30011
+
+  config:
+    name: nginx-config
+    # data: |
+      # map $request_uri $api_uri {
+      #     ~^/api(/.*$) $1;
+      #     default $request_uri;
+      # }
+
+      # server {
+      #     listen 80;
+      #     server_name opnform;
+      #     root /usr/share/nginx/html/public;
+      #     client_max_body_size 1g;
+
+      #     access_log /dev/stdout;
+      #     error_log /dev/stderr error;
+
+      #     index index.html index.htm index.php;
+
+      #     location / {
+      #         proxy_http_version 1.1;
+      #         proxy_pass http://myopnform-client-service:3000;
+      #         proxy_set_header X-Real-IP $remote_addr;
+      #         proxy_set_header X-Forwarded-Host $host;
+      #         proxy_set_header X-Forwarded-Port $server_port;
+      #         proxy_set_header Upgrade $http_upgrade;
+      #         proxy_set_header Connection "Upgrade";
+      #     }
+
+      #     location ~/(api|open|local\/temp|forms\/assets)/ {
+      #         set $original_uri $uri;
+      #         try_files $uri $uri/ /index.php$is_args$args;
+      #     }
+
+      #     location ~ \.php$ {
+      #         fastcgi_split_path_info ^(.+\.php)(/.+)$;
+      #         fastcgi_pass myopnform-api-service:9000;
+      #         fastcgi_index index.php;
+      #         include fastcgi_params;
+      #         fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+      #         fastcgi_param REQUEST_URI $api_uri;
+      #     }
+
+      #     # Deny access to . files
+      #     location ~ /\. {
+      #         deny all;
+      #     }
+      # }
+
+
+postgresql:
+  passwordUpdateJob:
+    enabled: true
+
+  ## @param global.postgresql.auth.postgresPassword Password for the "postgres" admin user (overrides `auth.postgresPassword`)
+  ## @param global.postgresql.auth.username Name for a custom user to create (overrides `auth.username`)
+  ## @param global.postgresql.auth.password Password for the custom user to create (overrides `auth.password`)
+  ## @param global.postgresql.auth.database Name for a custom database to create (overrides `auth.database`)
+  ## @param global.postgresql.auth.existingSecret Name of existing secret to use for PostgreSQL credentials (overrides `auth.existingSecret`).
+  ## @param global.postgresql.auth.secretKeys.adminPasswordKey Name of key in existing secret to use for PostgreSQL credentials (overrides `auth.secretKeys.adminPasswordKey`). Only used when `global.postgresql.auth.existingSecret` is set.
+  ## @param global.postgresql.auth.secretKeys.userPasswordKey Name of key in existing secret to use for PostgreSQL credentials (overrides `auth.secretKeys.userPasswordKey`). Only used when `global.postgresql.auth.existingSecret` is set.
+  ## @param global.postgresql.auth.secretKeys.replicationPasswordKey Name of key in existing secret to use for PostgreSQL credentials (overrides `auth.secretKeys.replicationPasswordKey`). Only used when `global.postgresql.auth.existingSecret` is set.
+  ##
+  auth:
+    username: "forge"
+    password: ""
+    database: "forge"
+    postgresPassword: ""
+
+    # username: ""
+    # # password: "secret123"
+    # database: ""
+    # # postgresPassword: "admin123"
+
+    existingSecret: "opnform-secret"
+    secretKeys:
+      adminPasswordKey: "postgres-password" 
+      userPasswordKey: "POSTGRES_PASSWORD"
+      replicationPasswordKey: ""
+  # @param global.postgresql.service.ports.postgresql PostgreSQL service port (overrides `service.ports.postgresql`)
+  #
+  service:
+    ports:
+      postgresql: "5432"
+
+
+
+# Default values for opnform.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+replicaCount: 1
+
+# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+image:
+  repository: nginx
+  # This sets the pull policy for images.
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: 
+  - name: dockerhub-creds
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# This is for setting Kubernetes Annotations to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+# This is for setting Kubernetes Labels to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+service:
+  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  type: ClusterIP
+  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
+  port: 80
+
+# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
